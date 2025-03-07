@@ -26,5 +26,6 @@ async function bootstrap() {
     })
   )
   logger.log("Product Microservices running")
+  await app.listen();
 }
 bootstrap();
