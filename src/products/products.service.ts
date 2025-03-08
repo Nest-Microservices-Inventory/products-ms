@@ -3,6 +3,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { convertToSlug } from 'src/common/helpers';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class ProductsService {
@@ -17,7 +18,10 @@ export class ProductsService {
     })
 
     if (productExists) {
-      throw new BadRequestException("Ya se registro un producto con ese nombre");
+      throw new RpcException({
+        statusCode: 400,
+        message: "El producto ya existe"
+      });
     }
 
     const product = await this.prisma.products.create({
@@ -47,7 +51,10 @@ export class ProductsService {
       }
     })
     if (!product) {
-      throw new NotFoundException("no se encontro el producto")
+      throw new RpcException({
+        statusCode: 400,
+        message: "No se encontro el producto"
+      })
     }
 
     return {
@@ -55,19 +62,21 @@ export class ProductsService {
     }
   }
 
-  async update(slug: string, updateProductDto: UpdateProductDto) {
-
-    const productoExist = await this.prisma.products.findFirst({
+  async update(term: string, updateProductDto: UpdateProductDto) {
+    const productExists = await this.prisma.products.findFirst({
       where: {
         OR: [
-          { id: slug },
-          { slug: slug },
+          { id: term },
+          { slug: term }
         ]
       }
     })
 
-    if (!productoExist) {
-      throw new NotFoundException("No se encontro el producto a actualizar");
+    if (!productExists) {
+      throw new RpcException({
+        statusCode: 404,
+        message: "No se encontro el producto"
+      });
     }
 
     if (updateProductDto.name) {
@@ -75,8 +84,9 @@ export class ProductsService {
     }
 
     const product = await this.prisma.products.update({
-      where:
-        { id: productoExist?.id },
+      where: {
+        id: productExists?.id
+      },
       data: {
         ...updateProductDto,
       }
@@ -99,7 +109,10 @@ export class ProductsService {
     })
 
     if (!productExists) {
-      throw new NotFoundException("No se encontro el producto")
+      throw new RpcException({
+        statusCode: 400,
+        message: "No se encontro el producto"
+      })
     }
 
     await this.prisma.products.delete({

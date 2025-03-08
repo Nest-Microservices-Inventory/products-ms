@@ -13,7 +13,8 @@ async function bootstrap() {
     {
       transport: Transport.NATS,
       options: {
-        servers: envs.natsServers
+        servers: envs.natsServers,
+        name: "products-ms"
       }
     }
   )

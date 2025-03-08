@@ -1,15 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
   @MessagePattern("createProduct")
-  create(@Body() createProductDto: CreateProductDto) {
+  create(@Payload() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
 
@@ -18,18 +18,18 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
-  @Get(':slug')
-  findOne(@Param('slug') slug: string) {
+  @MessagePattern('findOneProduct')
+  findOne(@Payload() slug: string) {
     return this.productsService.findOne(slug);
   }
 
-  @Patch(':slug')
-  update(@Param('slug') slug: string, @Body() updateProductDto: UpdateProductDto) {
+  @MessagePattern('updateProduct')
+  update(@Payload() slug: string, updateProductDto: UpdateProductDto) {
     return this.productsService.update(slug, updateProductDto);
   }
 
-  @Delete(':slug')
-  remove(@Param('slug') slug: string) {
+  @MessagePattern('removeProduct')
+  remove(@Payload() slug: string) {
     return this.productsService.remove(slug);
   }
 }
