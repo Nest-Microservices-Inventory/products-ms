@@ -125,4 +125,54 @@ export class ProductsService {
       message: "Producto Eliminado Correctamente"
     }
   }
+
+  async validateProductsIds(ids: string[]) {
+    ids = Array.from(new Set(ids));
+    const products = await this.prisma.products.findMany({
+      where: {
+        id: {
+          in: ids
+        }
+      }
+    })
+
+    if (products.length !== ids.length) {
+      throw new RpcException({
+        message: "No se encontro algun producto",
+        statusCode: 400
+      })
+    }
+
+    return products
+  }
+
+  async updateProductStock(productsQuantity: { id: string, quantity: number }[]){
+
+    const productIds = productsQuantity.map(product => product.id);
+
+    const products = await this.prisma.products.findMany({
+      where:{
+        id: {
+          in: productIds
+        }
+      }
+    })
+
+    products.map((product, index) => {
+      if( product.stock < productsQuantity[index].quantity ){
+        throw new RpcException({
+          statusCode: 400,
+          message: "Stock insuficiente"
+        })
+      }
+    })
+
+
+    products.map((product, index) => {
+      const newStock = product.stock - productsQuantity[index].quantity;
+      this.update(product.slug, {...product, stock: newStock});
+    })
+
+    return true;
+  }
 }
