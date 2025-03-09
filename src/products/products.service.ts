@@ -62,12 +62,12 @@ export class ProductsService {
     }
   }
 
-  async update(term: string, updateProductDto: UpdateProductDto) {
+  async update(slug: string, updateProductDto: UpdateProductDto) {
     const productExists = await this.prisma.products.findFirst({
       where: {
         OR: [
-          { id: term },
-          { slug: term }
+          { id: slug },
+          { slug: slug }
         ]
       }
     })
