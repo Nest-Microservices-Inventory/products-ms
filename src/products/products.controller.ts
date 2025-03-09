@@ -24,8 +24,8 @@ export class ProductsController {
   }
 
   @MessagePattern('updateProduct')
-  update(@Payload() slug: string, updateProductDto: UpdateProductDto) {
-    return this.productsService.update(slug, updateProductDto);
+  update(@Payload() term: string, updateProductDto: UpdateProductDto) {
+    return this.productsService.update(term, updateProductDto);
   }
 
   @MessagePattern('removeProduct')

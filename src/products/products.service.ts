@@ -62,12 +62,12 @@ export class ProductsService {
     }
   }
 
-  async update(slug: string, updateProductDto: UpdateProductDto) {
+  async update(term: string, updateProductDto: UpdateProductDto) {
     const productExists = await this.prisma.products.findFirst({
       where: {
         OR: [
-          { id: slug },
-          { slug: slug }
+          { id: term },
+          { slug: term }
         ]
       }
     })
@@ -146,12 +146,12 @@ export class ProductsService {
     return products
   }
 
-  async updateProductStock(productsQuantity: { id: string, quantity: number }[]){
+  async updateProductStock(productsQuantity: { id: string, quantity: number }[]) {
 
     const productIds = productsQuantity.map(product => product.id);
 
     const products = await this.prisma.products.findMany({
-      where:{
+      where: {
         id: {
           in: productIds
         }
@@ -159,7 +159,7 @@ export class ProductsService {
     })
 
     products.map((product, index) => {
-      if( product.stock < productsQuantity[index].quantity ){
+      if (product.stock < productsQuantity[index].quantity) {
         throw new RpcException({
           statusCode: 400,
           message: "Stock insuficiente"
@@ -170,7 +170,7 @@ export class ProductsService {
 
     products.map((product, index) => {
       const newStock = product.stock - productsQuantity[index].quantity;
-      this.update(product.slug, {...product, stock: newStock});
+      this.update(product.slug, { ...product, stock: newStock });
     })
 
     return true;
